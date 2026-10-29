@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Adoración Eucarística – Horarios</title>
+<meta name="theme-color" content="#3b5039">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Adoración">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{--bg:#efe9dc;--ink:#2b2b2b;--card:#fff;--line:#d8cfba;--green:#3b5039;--gold:#ffd966;--cream:#ffe9a8;--free:#87ceeb;--freeb:#2a7ab0;--muted:#6b6455;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -20,6 +27,8 @@ button:focus-visible,.c:focus-visible{outline:3px solid #e0a800;outline-offset:1
 .count{margin-left:auto;font-weight:bold}
 button:disabled{opacity:.45;cursor:default}
 #pan,#cf{margin-top:10px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:16px}
+.brand svg{width:38px;height:38px;flex:none}
 #ov{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.88);overflow:auto;text-align:center;color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))}
 #ov img{display:block;max-width:100%;margin:10px auto;border-radius:6px}
 #ov p{margin:0 auto 6px;max-width:420px;font-size:14px}
@@ -68,10 +77,12 @@ body.clean .hint{display:block}
 </head>
 <body>
 <div class="bar">
+  <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#3b5039"/><circle cx="50" cy="50" r="31" fill="none" stroke="#e7bf55" stroke-width="11" stroke-dasharray="4.5 7.4"/><circle cx="50" cy="50" r="23" fill="#e7bf55"/><circle cx="50" cy="50" r="17" fill="#fff6cf"/><rect x="48.2" y="39" width="3.6" height="22" fill="#3b5039"/><rect x="41" y="46" width="18" height="3.6" fill="#3b5039"/></svg><b>Horarios de Adoración</b></div>
   <p><b>Mantené apretada</b> una hora un ratito para marcarla como cubierta (queda vacía). Mantenela apretada de nuevo para liberarla. Todo se guarda solo en este celular.</p>
   <div class="row">
     <!-- <button id="cap">📸 Modo captura</button> -->
     <button id="shr">📤 Compartir</button>
+    <button id="ins" hidden>📲 Instalar app</button>
     <!-- <button id="dat">💾 Datos</button> -->
     <button id="undo">↩ Deshacer</button>
     <!-- <button id="rst">Volver al horario de la imagen</button> -->
@@ -89,9 +100,9 @@ body.clean .hint{display:block}
   </div> -->
 </div>
 <div id="poster">
-  <div class="head"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS POR CUBRIR - HORAS DISPONIBLES</h2><small>¡Jesús te espera! - Una hora con Jesús puede cambiar tu vida</small></div>
+  <div class="head"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS POR CUBRIR - HORAS DISPONIBLES</h2><small>Regalale una hora a Jesús, Él tiene mucho para darte</small></div>
   <div class="grid" id="grid"></div>
-  <div class="foot"><b>¡No dejemos a Jesús solo! ¿Te animás a sumarte?</b><span>Una hora con Jesús puede cambiar tu vida</span><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>
+  <div class="foot"><b>Cada hora cubierta es una oración que no se apaga</b><span>¿Te sumás?</span><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>
 </div>
 <div id="cmp" aria-hidden="true"></div>
 <div id="ov" hidden>
@@ -158,13 +169,13 @@ document.getElementById("cap").onclick=function(){document.body.classList.add("c
 document.getElementById("back").onclick=function(){document.body.classList.remove("clean")};
 var FULL=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO","DOMINGO"];
 function buildCmp(){
-  var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>¡Jesús te espera! – Una hora con Jesús puede cambiar tu vida</small></div><div class="cb">';
+  var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>Regalale una hora a Jesús, Él tiene mucho para darte</small></div><div class="cb">';
   for(var d=0;d<7;d++){
     var c="";
     for(var hr=1;hr<=23;hr++){if(state[d+"-"+hr])c+="<span>"+pad(hr)+"</span>"}
     h+='<div class="cr"><b>'+FULL[d]+'</b><div class="cc">'+(c||"<i>Todas las horas cubiertas ✓</i>")+'</div></div>';
   }
-  h+='</div><div class="cf2"><b>¡No dejemos a Jesús solo! ¿Te animás a sumarte?</b><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>';
+  h+='</div><div class="cf2"><b>Cada hora cubierta es una oración que no se apaga. ¿Te sumás?</b><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>';
   document.getElementById("cmp").innerHTML=h;
 }
 var ov=document.getElementById("ov");
@@ -204,6 +215,11 @@ document.getElementById("ld").onclick=function(){
   msg.textContent="Horario cargado ("+ks.length+" horas libres).";
 };
 build();
+var dip=null;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dip=e;document.getElementById("ins").hidden=false});
+document.getElementById("ins").onclick=function(){if(dip){dip.prompt();dip=null;this.hidden=true}};
+window.addEventListener("appinstalled",function(){document.getElementById("ins").hidden=true});
+try{if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0)navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}
 </script>
 </body>
 </html>
