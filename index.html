@@ -18,6 +18,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",V
 button{font:inherit;font-size:13px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 button:focus-visible,.c:focus-visible{outline:3px solid #e0a800;outline-offset:1px}
 .count{margin-left:auto;font-weight:bold}
+button:disabled{opacity:.45;cursor:default}
+#pan,#cf{margin-top:10px}
+#code{width:100%;font:12px monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px;margin-bottom:8px}
 #poster{max-width:520px;margin:0 auto;background:#f6f1e4;color:#1e2a1d;border-radius:6px;overflow:hidden}
 .top{background:radial-gradient(circle at 50% 120%,#fff6cf 0,#f6f1e4 70%);text-align:center;padding:14px 8px 10px}
 .sun{width:64px;height:64px;margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle,#fff 0 22%,#e7bf55 24% 38%,#fff3b8 40% 100%);box-shadow:0 0 0 3px #d4a53a,0 0 24px 8px #ffe28a}
@@ -51,8 +54,20 @@ body.clean .hint{display:block}
   <p><b>Mantené apretada</b> una hora un ratito para marcarla como cubierta (queda vacía). Mantenela apretada de nuevo para liberarla. Todo se guarda solo en este celular.</p>
   <div class="row">
     <button id="cap">📸 Modo captura</button>
-    <button id="rst">Restablecer todo</button>
+    <button id="dat">💾 Datos</button>
+    <button id="undo">↩ Deshacer</button>
+    <button id="rst">Volver al horario de la imagen</button>
     <span class="count" id="cnt"></span>
+  </div>
+  <div id="cf" hidden>
+    <p>¿Volver al horario de la imagen original? Se pierden los cambios actuales (se puede deshacer).</p>
+    <div class="row"><button id="cfy">Sí, volver</button><button id="cfn">Cancelar</button></div>
+  </div>
+  <div id="pan" hidden>
+    <p>Para pasar el horario a otra página: copiá el código y pegalo allá, en este mismo cuadro.</p>
+    <textarea id="code" rows="3" aria-label="Código del horario"></textarea>
+    <div class="row"><button id="cp">Copiar código</button><button id="ld">Cargar código pegado</button></div>
+    <p id="msg"></p>
   </div>
 </div>
 <div id="poster">
@@ -70,6 +85,9 @@ var state;
 try{var raw=localStorage.getItem(KEY);state=raw?JSON.parse(raw):initial()}catch(e){state=initial()}
 if(!state||typeof state!=="object")state=initial();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+var PK=KEY+"-prev";
+function snap(){try{localStorage.setItem(PK,JSON.stringify(state))}catch(e){}}
+function upd(){var has=false;try{has=!!localStorage.getItem(PK)}catch(e){}document.getElementById("undo").disabled=!has}
 function pad(h){return (h<10?"0":"")+h+":00"}
 var grid=document.getElementById("grid");
 function build(){
@@ -82,7 +100,7 @@ function build(){
       h+='<button class="c '+(f?"free":"taken")+'" data-k="'+k+'" data-h="'+hr+'" aria-pressed="'+(f?"false":"true")+'" aria-label="'+DAYS[d]+' '+pad(hr)+(f?' libre':' cubierta')+'">'+(f?pad(hr):"")+'</button>';
     }
   }
-  grid.innerHTML=h;
+  grid.innerHTML=h;upd();
   document.getElementById("cnt").textContent=Object.keys(state).filter(function(k){return state[k]}).length+" horas libres";
 }
 var timer=null,sx=0,sy=0,cur=null;
@@ -92,6 +110,7 @@ grid.addEventListener("pointerdown",function(e){
   stopHold();cur=b;sx=e.clientX;sy=e.clientY;b.classList.add("hold");
   timer=setTimeout(function(){
     var k=b.getAttribute("data-k");timer=null;cur=null;
+    snap();
     if(state[k])delete state[k];else state[k]=1;
     save();build();
     try{if(navigator.vibrate)navigator.vibrate(40)}catch(err){}
@@ -101,10 +120,28 @@ grid.addEventListener("pointermove",function(e){if(timer&&(Math.abs(e.clientX-sx
 ["pointerup","pointercancel","pointerleave"].forEach(function(n){grid.addEventListener(n,stopHold)});
 grid.addEventListener("contextmenu",function(e){e.preventDefault()});
 document.getElementById("rst").onclick=function(){
-  if(confirm("¿Volver al horario original? Se pierden los cambios.")){state=initial();save();build()}
+  document.getElementById("cf").hidden=false;
+};
+document.getElementById("cfn").onclick=function(){document.getElementById("cf").hidden=true};
+document.getElementById("cfy").onclick=function(){document.getElementById("cf").hidden=true;snap();state=initial();save();build()};
+document.getElementById("undo").onclick=function(){
+  try{var p=localStorage.getItem(PK);if(p){state=JSON.parse(p);localStorage.removeItem(PK);save();build()}}catch(e){}
 };
 document.getElementById("cap").onclick=function(){document.body.classList.add("clean");window.scrollTo(0,0)};
 document.getElementById("back").onclick=function(){document.body.classList.remove("clean")};
+var ta=document.getElementById("code"),msg=document.getElementById("msg");
+function code(){return "ADO1:"+Object.keys(state).filter(function(k){return state[k]}).join(",")}
+document.getElementById("dat").onclick=function(){var p=document.getElementById("pan");p.hidden=!p.hidden;if(!p.hidden){ta.value=code();msg.textContent=""}};
+document.getElementById("cp").onclick=function(){ta.value=code();ta.select();var m="Mantené apretado el texto y elegí Copiar.";try{navigator.clipboard.writeText(ta.value).then(function(){msg.textContent="Código copiado."},function(){msg.textContent=m})}catch(e){msg.textContent=m}};
+document.getElementById("ld").onclick=function(){
+  var t=ta.value.trim();
+  if(t.indexOf("ADO1:")!==0){msg.textContent="El código no es válido.";return}
+  var ks=t.slice(5).split(",").filter(Boolean);
+  var ok=ks.every(function(k){return /^[0-6]-([1-9]|1\d|2[0-3])$/.test(k)});
+  if(!ok){msg.textContent="El código no es válido.";return}
+  snap();state={};ks.forEach(function(k){state[k]=1});save();build();
+  msg.textContent="Horario cargado ("+ks.length+" horas libres).";
+};
 build();
 </script>
 </body>
