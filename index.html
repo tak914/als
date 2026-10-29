@@ -20,6 +20,23 @@ button:focus-visible,.c:focus-visible{outline:3px solid #e0a800;outline-offset:1
 .count{margin-left:auto;font-weight:bold}
 button:disabled{opacity:.45;cursor:default}
 #pan,#cf{margin-top:10px}
+#ov{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.88);overflow:auto;text-align:center;color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))}
+#ov img{display:block;max-width:100%;margin:10px auto;border-radius:6px}
+#ov p{margin:0 auto 6px;max-width:420px;font-size:14px}
+#cmp{position:absolute;left:-10000px;top:0;width:480px;background:#f6f1e4;color:#1e2a1d;font-family:"Trebuchet MS",Verdana,sans-serif}
+#cmp .ch{background:#3b5039;color:#fff;text-align:center;padding:14px 10px}
+#cmp h1{margin:0;font:bold 26px Georgia,serif;color:#ffe9a8;letter-spacing:1px}
+#cmp h2{margin:4px 0 2px;font-size:15px}
+#cmp small{font-size:11px;color:#dfe6d6}
+#cmp .cb{padding:10px 12px;background:#fbf8ef}
+#cmp .cr{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #e3dcc6}
+#cmp .cr:last-child{border:0}
+#cmp .cr b{flex:0 0 86px;background:#ffd966;border-radius:6px;text-align:center;font-size:12px;padding:7px 0;color:#3a2d00}
+#cmp .cc{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+#cmp .cc span{background:#87ceeb;border:1px solid #2a7ab0;border-radius:5px;font:bold 13px sans-serif;color:#0d2a44;padding:4px 7px}
+#cmp .cc i{font-size:12px;color:#6b6455;padding:6px 0}
+#cmp .cf2{background:#3b5039;text-align:center;padding:10px;color:#fff}
+#cmp .cf2 b{display:block;color:#ffe9a8;font-size:14px;margin-bottom:3px}
 #code{width:100%;font:12px monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px;margin-bottom:8px}
 #poster{max-width:520px;margin:0 auto;background:#f6f1e4;color:#1e2a1d;border-radius:6px;overflow:hidden}
 .top{background:radial-gradient(circle at 50% 120%,#fff6cf 0,#f6f1e4 70%);text-align:center;padding:14px 8px 10px}
@@ -53,29 +70,37 @@ body.clean .hint{display:block}
 <div class="bar">
   <p><b>Mantené apretada</b> una hora un ratito para marcarla como cubierta (queda vacía). Mantenela apretada de nuevo para liberarla. Todo se guarda solo en este celular.</p>
   <div class="row">
-    <button id="cap">📸 Modo captura</button>
-    <button id="dat">💾 Datos</button>
+    <!-- <button id="cap">📸 Modo captura</button> -->
+    <button id="shr">📤 Compartir</button>
+    <!-- <button id="dat">💾 Datos</button> -->
     <button id="undo">↩ Deshacer</button>
-    <button id="rst">Volver al horario de la imagen</button>
+    <!-- <button id="rst">Volver al horario de la imagen</button> -->
     <span class="count" id="cnt"></span>
   </div>
-  <div id="cf" hidden>
+  <!-- <div id="cf" hidden>
     <p>¿Volver al horario de la imagen original? Se pierden los cambios actuales (se puede deshacer).</p>
     <div class="row"><button id="cfy">Sí, volver</button><button id="cfn">Cancelar</button></div>
-  </div>
-  <div id="pan" hidden>
+  </div> -->
+  <!-- <div id="pan" hidden>
     <p>Para pasar el horario a otra página: copiá el código y pegalo allá, en este mismo cuadro.</p>
     <textarea id="code" rows="3" aria-label="Código del horario"></textarea>
     <div class="row"><button id="cp">Copiar código</button><button id="ld">Cargar código pegado</button></div>
     <p id="msg"></p>
-  </div>
+  </div> -->
 </div>
 <div id="poster">
   <div class="head"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS POR CUBRIR - HORAS DISPONIBLES</h2><small>¡Jesús te espera! - Una hora con Jesús puede cambiar tu vida</small></div>
   <div class="grid" id="grid"></div>
   <div class="foot"><b>¡No dejemos a Jesús solo! ¿Te animás a sumarte?</b><span>Una hora con Jesús puede cambiar tu vida</span><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>
 </div>
+<div id="cmp" aria-hidden="true"></div>
+<div id="ov" hidden>
+  <p id="ovt"></p>
+  <img id="ovimg" alt="Horario de adoración" hidden>
+  <button id="ovx">Cerrar</button>
+</div>
 <div class="hint"><button id="back">Salir del modo captura</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 var DAYS=["LUN","MAR","MIE","JUE","VIE","SAB","DOM"];
 var INIT=[[4,8,9,12,15,17],[1,2,7,10,11,16],[8,11,12],[1,4,7,9,10,11,12,19,20],[2,7,11,12,17,22,23],[2,3,4,9,10,11,12,15,16,18,19,21],[2,4,5,8,9,12,15,18,19,23]];
@@ -119,6 +144,8 @@ grid.addEventListener("pointerdown",function(e){
 grid.addEventListener("pointermove",function(e){if(timer&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10))stopHold()});
 ["pointerup","pointercancel","pointerleave"].forEach(function(n){grid.addEventListener(n,stopHold)});
 grid.addEventListener("contextmenu",function(e){e.preventDefault()});
+// Si se comentan botones en el HTML, esto crea botones ocultos para que el script no falle
+["cap","rst","dat","cp","ld","cfy","cfn","cf"].forEach(function(i){if(!document.getElementById(i)){var s=document.createElement("button");s.id=i;s.hidden=true;document.body.appendChild(s)}});
 document.getElementById("rst").onclick=function(){
   document.getElementById("cf").hidden=false;
 };
@@ -129,6 +156,40 @@ document.getElementById("undo").onclick=function(){
 };
 document.getElementById("cap").onclick=function(){document.body.classList.add("clean");window.scrollTo(0,0)};
 document.getElementById("back").onclick=function(){document.body.classList.remove("clean")};
+var FULL=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO","DOMINGO"];
+function buildCmp(){
+  var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>¡Jesús te espera! – Una hora con Jesús puede cambiar tu vida</small></div><div class="cb">';
+  for(var d=0;d<7;d++){
+    var c="";
+    for(var hr=1;hr<=23;hr++){if(state[d+"-"+hr])c+="<span>"+pad(hr)+"</span>"}
+    h+='<div class="cr"><b>'+FULL[d]+'</b><div class="cc">'+(c||"<i>Todas las horas cubiertas ✓</i>")+'</div></div>';
+  }
+  h+='</div><div class="cf2"><b>¡No dejemos a Jesús solo! ¿Te animás a sumarte?</b><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>';
+  document.getElementById("cmp").innerHTML=h;
+}
+var ov=document.getElementById("ov");
+function showOv(u,t){var im=document.getElementById("ovimg");if(u){im.src=u;im.hidden=false}else{im.hidden=true}document.getElementById("ovt").textContent=t;ov.hidden=false;ov.scrollTop=0}
+document.getElementById("ovx").onclick=function(){ov.hidden=true};
+document.getElementById("shr").onclick=function(){
+  var b=this,lab="📤 Compartir";
+  function done(){b.disabled=false;b.textContent=lab}
+  function fail(){done();showOv(null,"No se pudo crear la imagen. Podés sacar una captura de pantalla normal con el Modo captura.")}
+  if(typeof html2canvas==="undefined"){fail();return}
+  b.disabled=true;b.textContent="Creando imagen…";
+  buildCmp();html2canvas(document.getElementById("cmp"),{scale:2,backgroundColor:null,onclone:function(d){d.getElementById("cmp").style.left="0px"}}).then(function(cv){
+    cv.toBlob(function(blob){
+      if(!blob){fail();return}
+      var url=cv.toDataURL("image/png");
+      var file=new File([blob],"adoracion-horarios.png",{type:"image/png"});
+      var can=false;try{can=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
+      if(!can){done();showOv(url,"Mantené apretada la imagen y elegí Compartir o Guardar, y después enviásela por WhatsApp.");return}
+      navigator.share({files:[file],title:"Adoración Eucarística"}).then(done,function(err){
+        done();
+        if(!err||err.name!=="AbortError")showOv(url,"Mantené apretada la imagen y elegí Compartir o Guardar, y después enviásela por WhatsApp.");
+      });
+    },"image/png");
+  }).catch(fail);
+};
 var ta=document.getElementById("code"),msg=document.getElementById("msg");
 function code(){return "ADO1:"+Object.keys(state).filter(function(k){return state[k]}).join(",")}
 document.getElementById("dat").onclick=function(){var p=document.getElementById("pan");p.hidden=!p.hidden;if(!p.hidden){ta.value=code();msg.textContent=""}};
