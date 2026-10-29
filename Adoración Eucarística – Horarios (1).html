@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adoración Eucarística – Horarios</title>
+<style>
+:root{--bg:#efe9dc;--ink:#2b2b2b;--card:#fff;--line:#d8cfba;--green:#3b5039;--gold:#ffd966;--cream:#ffe9a8;--free:#87ceeb;--freeb:#2a7ab0;--muted:#6b6455;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d211c;--ink:#ece8dc;--card:#2a2f28;--line:#454c42;--muted:#a9a48f}}
+:root[data-theme="dark"]{--bg:#1d211c;--ink:#ece8dc;--card:#2a2f28;--line:#454c42;--muted:#a9a48f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",Verdana,sans-serif;padding:10px}
+.bar{max-width:520px;margin:0 auto 10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.bar p{margin:0 0 8px;color:var(--muted);line-height:1.35}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;font-size:13px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button:focus-visible,.c:focus-visible{outline:3px solid #e0a800;outline-offset:1px}
+.count{margin-left:auto;font-weight:bold}
+#poster{max-width:520px;margin:0 auto;background:#f6f1e4;color:#1e2a1d;border-radius:6px;overflow:hidden}
+.top{background:radial-gradient(circle at 50% 120%,#fff6cf 0,#f6f1e4 70%);text-align:center;padding:14px 8px 10px}
+.sun{width:64px;height:64px;margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle,#fff 0 22%,#e7bf55 24% 38%,#fff3b8 40% 100%);box-shadow:0 0 0 3px #d4a53a,0 0 24px 8px #ffe28a}
+.head{background:var(--green);color:#fff;text-align:center;padding:10px 8px}
+.head h1{margin:0;font:bold 25px Georgia,serif;color:var(--cream);letter-spacing:1px}
+.head h2{margin:2px 0;font-size:14px}
+.head small{font-size:11px;color:#dfe6d6}
+.grid{display:grid;grid-template-columns:34px repeat(7,1fr);gap:3px;padding:8px 6px;background:#fbf8ef}
+.h{background:var(--gold);border-radius:6px;text-align:center;font:bold 11px sans-serif;padding:7px 0;color:#3a2d00}
+.h.hr{background:var(--green);color:#fff}
+.t{background:var(--cream);border-radius:5px;font:bold 10px sans-serif;display:flex;align-items:center;justify-content:center;color:#3a2d00;height:24px}
+.c{height:24px;border-radius:5px;background:#f1ede1;border:1px solid transparent;font:bold 10px sans-serif;color:#0d2a44;padding:0;cursor:pointer}
+.c.free{background:var(--free);border-color:var(--freeb)}
+.c.taken{color:transparent}
+.c{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.c.hold{animation:hold .6s linear forwards}
+@keyframes hold{from{transform:scale(1);box-shadow:0 0 0 0 #e0a800}to{transform:scale(.86);box-shadow:0 0 0 3px #e0a800}}
+@media (prefers-reduced-motion:reduce){.c.hold{animation:none;box-shadow:0 0 0 3px #e0a800}}
+.foot{background:var(--green);text-align:center;padding:10px 8px;color:#fff}
+.foot b{display:block;color:var(--cream);font-size:13px}
+.foot span{display:block;font-size:14px;font-weight:bold;margin:3px 0}
+.foot small{font-size:10px;color:#dfe6d6}
+body.clean .bar{display:none}
+body.clean .c.taken{cursor:default}
+.hint{display:none;max-width:520px;margin:8px auto;text-align:center}
+body.clean .hint{display:block}
+</style>
+</head>
+<body>
+<div class="bar">
+  <p><b>Mantené apretada</b> una hora un ratito para marcarla como cubierta (queda vacía). Mantenela apretada de nuevo para liberarla. Todo se guarda solo en este celular.</p>
+  <div class="row">
+    <button id="cap">📸 Modo captura</button>
+    <button id="rst">Restablecer todo</button>
+    <span class="count" id="cnt"></span>
+  </div>
+</div>
+<div id="poster">
+  <div class="head"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS POR CUBRIR - HORAS DISPONIBLES</h2><small>¡Jesús te espera! - Una hora con Jesús puede cambiar tu vida</small></div>
+  <div class="grid" id="grid"></div>
+  <div class="foot"><b>¡No dejemos a Jesús solo! ¿Te animás a sumarte?</b><span>Una hora con Jesús puede cambiar tu vida</span><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>
+</div>
+<div class="hint"><button id="back">Salir del modo captura</button></div>
+<script>
+var DAYS=["LUN","MAR","MIE","JUE","VIE","SAB","DOM"];
+var INIT=[[4,8,9,12,15,17],[1,2,7,10,11,16],[8,11,12],[1,4,7,9,10,11,12,19,20],[2,7,11,12,17,22,23],[2,3,4,9,10,11,12,15,16,18,19,21],[2,4,5,8,9,12,15,18,19,23]];
+var KEY="adoracion-libres-v1";
+function initial(){var s={};INIT.forEach(function(a,d){a.forEach(function(h){s[d+"-"+h]=1})});return s}
+var state;
+try{var raw=localStorage.getItem(KEY);state=raw?JSON.parse(raw):initial()}catch(e){state=initial()}
+if(!state||typeof state!=="object")state=initial();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function pad(h){return (h<10?"0":"")+h+":00"}
+var grid=document.getElementById("grid");
+function build(){
+  var h='<div class="h hr">HORA</div>';
+  DAYS.forEach(function(d){h+='<div class="h">'+d+'</div>'});
+  for(var hr=1;hr<=23;hr++){
+    h+='<div class="t">'+pad(hr)+'</div>';
+    for(var d=0;d<7;d++){
+      var k=d+"-"+hr,f=state[k];
+      h+='<button class="c '+(f?"free":"taken")+'" data-k="'+k+'" data-h="'+hr+'" aria-pressed="'+(f?"false":"true")+'" aria-label="'+DAYS[d]+' '+pad(hr)+(f?' libre':' cubierta')+'">'+(f?pad(hr):"")+'</button>';
+    }
+  }
+  grid.innerHTML=h;
+  document.getElementById("cnt").textContent=Object.keys(state).filter(function(k){return state[k]}).length+" horas libres";
+}
+var timer=null,sx=0,sy=0,cur=null;
+function stopHold(){if(timer){clearTimeout(timer);timer=null}if(cur){cur.classList.remove("hold");cur=null}}
+grid.addEventListener("pointerdown",function(e){
+  var b=e.target.closest(".c");if(!b||document.body.classList.contains("clean"))return;
+  stopHold();cur=b;sx=e.clientX;sy=e.clientY;b.classList.add("hold");
+  timer=setTimeout(function(){
+    var k=b.getAttribute("data-k");timer=null;cur=null;
+    if(state[k])delete state[k];else state[k]=1;
+    save();build();
+    try{if(navigator.vibrate)navigator.vibrate(40)}catch(err){}
+  },600);
+});
+grid.addEventListener("pointermove",function(e){if(timer&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10))stopHold()});
+["pointerup","pointercancel","pointerleave"].forEach(function(n){grid.addEventListener(n,stopHold)});
+grid.addEventListener("contextmenu",function(e){e.preventDefault()});
+document.getElementById("rst").onclick=function(){
+  if(confirm("¿Volver al horario original? Se pierden los cambios.")){state=initial();save();build()}
+};
+document.getElementById("cap").onclick=function(){document.body.classList.add("clean");window.scrollTo(0,0)};
+document.getElementById("back").onclick=function(){document.body.classList.remove("clean")};
+build();
+</script>
+</body>
+</html>
