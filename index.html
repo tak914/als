@@ -37,6 +37,7 @@ button:disabled{opacity:.45;cursor:default}
 #cmp h1{margin:0;font:bold 26px Georgia,serif;color:#ffe9a8;letter-spacing:1px}
 #cmp h2{margin:4px 0 2px;font-size:15px}
 #cmp small{font-size:11px;color:#dfe6d6}
+#cmp .up{margin-top:6px;font-size:12px;font-weight:bold;color:#ffd966}
 #cmp .cb{padding:10px 12px;background:#fbf8ef}
 #cmp .cr{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #e3dcc6}
 #cmp .cr:last-child{border:0}
@@ -60,7 +61,7 @@ button:disabled{opacity:.45;cursor:default}
 .t{background:var(--cream);border-radius:5px;font:bold 10px sans-serif;display:flex;align-items:center;justify-content:center;color:#3a2d00;height:24px}
 .c{height:24px;border-radius:5px;background:#f1ede1;border:1px solid transparent;font:bold 10px sans-serif;color:#0d2a44;padding:0;cursor:pointer}
 .c.free{background:var(--free);border-color:var(--freeb)}
-.c.taken{color:transparent}
+.c.taken{color:#b9b19b;font-weight:normal}
 .c{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .c.hold{animation:hold .6s linear forwards}
 @keyframes hold{from{transform:scale(1);box-shadow:0 0 0 0 #e0a800}to{transform:scale(.86);box-shadow:0 0 0 3px #e0a800}}
@@ -133,7 +134,7 @@ function build(){
     h+='<div class="t">'+pad(hr)+'</div>';
     for(var d=0;d<7;d++){
       var k=d+"-"+hr,f=state[k];
-      h+='<button class="c '+(f?"free":"taken")+'" data-k="'+k+'" data-h="'+hr+'" aria-pressed="'+(f?"false":"true")+'" aria-label="'+DAYS[d]+' '+pad(hr)+(f?' libre':' cubierta')+'">'+(f?pad(hr):"")+'</button>';
+      h+='<button class="c '+(f?"free":"taken")+'" data-k="'+k+'" data-h="'+hr+'" aria-pressed="'+(f?"false":"true")+'" aria-label="'+DAYS[d]+' '+pad(hr)+(f?' libre':' cubierta')+'">'+pad(hr)+'</button>';
     }
   }
   grid.innerHTML=h;upd();
@@ -169,7 +170,8 @@ document.getElementById("cap").onclick=function(){document.body.classList.add("c
 document.getElementById("back").onclick=function(){document.body.classList.remove("clean")};
 var FULL=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO","DOMINGO"];
 function buildCmp(){
-  var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>Regalale una hora a Jesús, Él tiene mucho para darte</small></div><div class="cb">';
+  var fh=new Date().toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"});
+  var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>Regalale una hora a Jesús, Él tiene mucho para darte</small><div class="up">Actualizado: '+fh+'</div></div><div class="cb">';
   for(var d=0;d<7;d++){
     var c="";
     for(var hr=1;hr<=23;hr++){if(state[d+"-"+hr])c+="<span>"+pad(hr)+"</span>"}
