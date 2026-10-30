@@ -170,7 +170,7 @@ document.getElementById("cap").onclick=function(){document.body.classList.add("c
 document.getElementById("back").onclick=function(){document.body.classList.remove("clean")};
 var FULL=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO","DOMINGO"];
 function buildCmp(){
-  var fh=new Date().toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"});
+  var fh=new Date().toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"})+", "+new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",hour12:false})+" hs";
   var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>Regalale una hora a Jesús, Él tiene mucho para darte</small><div class="up">Actualizado: '+fh+'</div></div><div class="cb">';
   for(var d=0;d<7;d++){
     var c="";
