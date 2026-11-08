@@ -130,7 +130,7 @@ var grid=document.getElementById("grid");
 function build(){
   var h='<div class="h hr">HORA</div>';
   DAYS.forEach(function(d){h+='<div class="h">'+d+'</div>'});
-  for(var hr=1;hr<=23;hr++){
+  for(var hr=0;hr<=23;hr++){
     h+='<div class="t">'+pad(hr)+'</div>';
     for(var d=0;d<7;d++){
       var k=d+"-"+hr,f=state[k];
@@ -174,7 +174,7 @@ function buildCmp(){
   var h='<div class="ch"><h1>ADORACIÓN EUCARÍSTICA</h1><h2>HORAS DISPONIBLES</h2><small>Regalale una hora a Jesús, Él tiene mucho para darte</small><div class="up">Actualizado: '+fh+'</div></div><div class="cb">';
   for(var d=0;d<7;d++){
     var c="";
-    for(var hr=1;hr<=23;hr++){if(state[d+"-"+hr])c+="<span>"+pad(hr)+"</span>"}
+    for(var hr=0;hr<=23;hr++){if(state[d+"-"+hr])c+="<span>"+pad(hr)+"</span>"}
     h+='<div class="cr"><b>'+FULL[d]+'</b><div class="cc">'+(c||"<i>Todas las horas cubiertas ✓</i>")+'</div></div>';
   }
   h+='</div><div class="cf2"><b>Cada hora cubierta es una oración que no se apaga. ¿Te sumás?</b><small>Respondé: Nombre + Día + Hora que podés cubrir</small></div>';
@@ -211,7 +211,7 @@ document.getElementById("ld").onclick=function(){
   var t=ta.value.trim();
   if(t.indexOf("ADO1:")!==0){msg.textContent="El código no es válido.";return}
   var ks=t.slice(5).split(",").filter(Boolean);
-  var ok=ks.every(function(k){return /^[0-6]-([1-9]|1\d|2[0-3])$/.test(k)});
+  var ok=ks.every(function(k){return /^[0-6]-(0|[1-9]|1\d|2[0-3])$/.test(k)});
   if(!ok){msg.textContent="El código no es válido.";return}
   snap();state={};ks.forEach(function(k){state[k]=1});save();build();
   msg.textContent="Horario cargado ("+ks.length+" horas libres).";
